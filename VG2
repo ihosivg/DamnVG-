@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8" />
+<title>بازی مار ساده</title>
+<style>
+  body {
+    margin: 0;
+    background: #111;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    margin: auto;
+    background: #222;
+    border: 2px solid #444;
+  }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas" width="600" height="400"></canvas>
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const gridSize = 20;
+  const tileCountX = canvas.width / gridSize;
+  const tileCountY = canvas.height / gridSize;
+
+  let snake = [{x: 10, y: 10}];
+  let velocityX = 0;
+  let velocityY = 0;
+
+  let food = {
+    x: Math.floor(Math.random() * tileCountX),
+    y: Math.floor(Math.random() * tileCountY)
+  };
+
+  function draw() {
+    ctx.fillStyle = '#222';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw food
+    ctx.fillStyle = 'red';
+    ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+
+    // Move snake
+    let head = {...snake[0]};
+    head.x += velocityX;
+    head.y += velocityY;
+
+    // Wrap around edges
+    if (head.x < 0) head.x = tileCountX - 1;
+    if (head.x >= tileCountX) head.x = 0;
+    if (head.y < 0) head.y = tileCountY - 1;
+    if (head.y >= tileCountY) head.y = 0;
+
+    // Check collision with self
+    for (let segment of snake) {
+      if (segment.x === head.x && segment.y === head.y) {
+        alert('باختی! بازی دوباره شروع می‌شود.');
+        snake = [{x: 10, y: 10}];
+        velocityX = 0;
+        velocityY = 0;
+        return;
+      }
+    }
+
+    snake.unshift(head);
+
+    // Check if food eaten
+    if (head.x === food.x && head.y === food.y) {
+      food = {
+        x: Math.floor(Math.random() * tileCountX),
+        y: Math.floor(Math.random() * tileCountY)
+      };
+    } else {
+      snake.pop();
+    }
+
+    // Draw snake
+    ctx.fillStyle = '#0f0';
+    for (let segment of snake) {
+      ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    switch(e.key) {
+      case 'ArrowUp':
+        if (velocityY === 1) break;
+        velocityX = 0; velocityY = -1;
+        break;
+      case 'ArrowDown':
+        if (velocityY === -1) break;
+        velocityX = 0; velocityY = 1;
+        break;
+      case 'ArrowLeft':
+        if (velocityX === 1) break;
+        velocityX = -1; velocityY = 0;
+        break;
+      case 'ArrowRight':
+        if (velocityX === -1) break;
+        velocityX = 1; velocityY = 0;
+        break;
+    }
+  });
+
+  setInterval(draw, 100);
+</script>
+</body>
+</html>
